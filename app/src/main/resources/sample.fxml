@@ -1,0 +1,10 @@
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.control.TableRow?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Button?>
+<GridPane fx:controller="cn.geekcity.xiot.Controller"
+          xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
+    <TextArea fx:id="textArea" />
+    <Button fx:id="button" text="button" onAction="#handleAction"/>
+</GridPane>

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+branch=$(git branch --show-current)
+echo $branch
+
+remotes=$(git remote)
+for s in $remotes
+do
+	echo "Push to $s"
+	git push $s $branch
+done

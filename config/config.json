@@ -1,0 +1,31 @@
+{
+  "cors": true,
+  "port": 8010,
+  "product": {
+    "host": "localhost",
+    "port": 8015,
+    "connectTimeout": 10,
+    "idleTimeout": 10
+  },
+  "organization": {
+    "host": "39.100.199.253",
+    "port": 3306,
+    "user": "dev_w",
+    "password": "kn0!niot_d3v666",
+    "database": "iot_developer",
+    "poolSize": 30
+  },
+  "standard": {
+    "host": "localhost",
+    "port": 8018,
+    "connectTimeout": 10,
+    "idleTimeout": 10
+  },
+  "miot": {
+    "host": "miot-spec.org",
+    "port": 443,
+    "https": true,
+    "connectTimeout": 10,
+    "idleTimeout": 10
+  }
+}

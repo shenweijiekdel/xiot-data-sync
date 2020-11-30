@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
+}
+
+sourceCompatibility = 1.8
+mainClassName = 'cn.geekcity.xiot.Main'
+
+dependencies {
+    compile "io.vertx:vertx-core:${VertxVersion}"
+    compile "io.vertx:vertx-config:${VertxVersion}"
+    compile "io.vertx:vertx-web:${VertxVersion}"
+    testCompile "io.vertx:vertx-junit5:${VertxVersion}"
+    compile "cn.geekcity.xiot:xiot-support-utils:${XiotCoreVersion}"
+    compile "cn.geekcity.xiot:xiot-spec-codec-vertx:${XiotCoreVersion}"
+    compile "cn.geekcity.xiot:xiot-spec-codec-generic:${XiotCoreVersion}"
+    compile "cn.geekcity.xiot:xiot-config-spi-acm:${XiotCoreVersion}"
+    compile "io.vertx:vertx-mysql-client:${VertxVersion}"
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+
+
+    compile "org.slf4j:slf4j-api:${Slf4jVersion}"
+
+    compile "ch.qos.logback:logback-classic:${LogbackVersion}"
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+shadowJar {
+    baseName = 'main'
+    version = ''
+    classifier = ''
+    manifest {
+        attributes 'Main-Class': mainClassName
+
+    }
+
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}

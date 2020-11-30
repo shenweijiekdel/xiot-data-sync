@@ -1,0 +1,33 @@
+allprojects  {
+  group = 'cn.geekcity.xiot'
+  version = '0.47.0-SNAPSHOT'
+}
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'idea'
+
+  [compileJava,compileTestJava,javadoc]*.options*.encoding = 'UTF-8'
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+  }
+
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+  }
+
+  task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+  }
+}

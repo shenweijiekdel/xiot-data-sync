@@ -1,0 +1,1 @@
+java -Dlogback.configurationFile=config/logback-accesspoint.xml -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory -jar app/build/libs/xiot-accesspoint-0.6.8-SNAPSHOT-fat.jar -conf ./config/xiot-accesspoint.json
