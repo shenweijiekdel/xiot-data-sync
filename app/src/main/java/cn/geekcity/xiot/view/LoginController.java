@@ -16,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class LoginController {
+
     private final Stage stage = StageUtils.getStage(StageType.LOGIN_STAGE);
     public TextField tx_username;
     public PasswordField tx_password;
@@ -24,6 +25,8 @@ public class LoginController {
     public void handleLogin(ActionEvent event) {
         String username = tx_username.textProperty().get();
         String password = tx_password.textProperty().get();
+        username = "shenweijiekdel";
+        password = "swj7528065";
         if (username.isEmpty() || password.isEmpty()) {
             alert(Alert.AlertType.ERROR, "必须输入用户名或密码");
             return ;
