@@ -10,6 +10,7 @@ public class Product {
     private final SimpleStringProperty model = new SimpleStringProperty("");
     private final SimpleStringProperty spec = new SimpleStringProperty("");
     private final SimpleStringProperty template = new SimpleStringProperty("");
+    private final SimpleStringProperty diff = new SimpleStringProperty("");
 
     public Product(Integer id, String name, String model, String spec, String template) {
         this.id.set(id);
@@ -53,6 +54,10 @@ public class Product {
 
     public void setModel(String model) {
         this.model.set(model);
+    }
+
+    public void setDiff(String diff) {
+        this.diff.set(diff);
     }
 
     public String getSpec() {

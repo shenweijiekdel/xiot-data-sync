@@ -23,6 +23,8 @@ import javafx.stage.WindowEvent;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static cn.geekcity.xiot.Main.productService;
 
@@ -43,71 +45,72 @@ public class HomeController {
     }
 
     private void onShown(WindowEvent event) {
+        initProductColumns();
         envBox.getSelectionModel().selectedItemProperty().addListener(this::handleEnvChanged);
-        envBox.getSelectionModel().selectedItemProperty().addListener(this::handleTargetEnvChanged);
-        loadData();
+        targetEnvBox.getSelectionModel().selectedItemProperty().addListener(this::handleTargetEnvChanged);
+        getSourceData()
+                .compose(this::renderData);
     }
 
     private void handleTargetEnvChanged(Observable observable, String oldValue, String newValue) {
+        loadAndCompareTargetEnvData();
     }
 
     private void handleEnvChanged(Observable observable, String oldValue, String newValue) {
-        String envPrefix = Main.ENV_PREFIX.get(newValue);
-        loadData();
+        getSourceData()
+                .compose(this::renderData);
     }
 
 
-    public Future<ProductDiffer> loadData() {
-        Promise<ProductDiffer> promise = Promise.promise();
-
+    public Future<ObservableList<Product>> getSourceData() {
         String envPrefix = Main.ENV_PREFIX.get(envBox.getValue());
-        String targetEnvPrefix = Main.ENV_PREFIX.get(targetEnvBox.getValue());
-        productService.products(envPrefix)
+        return productService.products(envPrefix)
                 .map(ProductCodec::decode)
-                .onComplete(ar -> {
-                    if (ar.succeeded()) {
-                        if (envPrefix.equals(targetEnvPrefix)) {
-                            promise.complete(new ProductDiffer().source(ar.result()).target(ar.result()));
-                        } else {
-                            productService.products(targetEnvPrefix)
-                                    .map(ProductCodec::decode)
-                                    .onComplete(ar2 -> {
-                                        if (ar.succeeded()) {
-                                            promise.complete(new ProductDiffer().source(ar.result()).target(ar2.result()));
-                                        } else {
-                                            promise.fail(ar.cause());
-                                        }
-                                    });
-                        }
-                    } else {
-                        promise.fail(ar.cause());
-                    }
-                });
-
-        return promise.future();
+                .map(FXCollections::observableArrayList);
     }
 
-    public void renderData(List<Product> source, List<Product> target) {
+    public void loadAndCompareTargetEnvData() {
+        getTargetEnvData()
+                .map(x -> markdiff(product_list.getItems(), x))
+                .compose(this::renderData);
+    }
 
-        String sourceEnv = envBox.getValue();
-        String targetEnv = envBox.getValue();
-        productService.products(sourceEnv)
-                .onComplete(ar -> {
-                    if (ar.succeeded()) {
-                        Platform.runLater(() -> {
-                            List<Product> decode = ProductCodec.decode(ar.result());
-                            ObservableList<Product> products = FXCollections.observableArrayList(decode);
-                            product_colId.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("id"));
-                            product_colName.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("name"));
-                            product_colModel.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("model"));
-                            product_colNs.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("spec"));
-                            product_list.setItems(products);
-                        });
-                    } else {
-                        ar.cause().printStackTrace();
-                        handleFail(ar.cause());
-                    }
-                });
+    private ObservableList<Product> markdiff(ObservableList<Product> source, ObservableList<Product> target) {
+        return FXCollections.observableArrayList(source.stream().peek(x -> {
+            Optional<Product> first = target.stream().filter(x1 -> x1.getModel().equals(x.getModel()) && x1.getSpec().equals(x.getSpec())).findFirst();
+            if (!first.isPresent()) {
+                x.setDiff("not exists");
+                return;
+            }
+
+            Product tar = first.get();
+            if (!x.getName().equals(tar.getName())) {
+                x.setDiff("name");
+                return;
+            }
+
+            x.setDiff("no diff");
+        }).collect(Collectors.toList()));
+    }
+
+    public Future<ObservableList<Product>> getTargetEnvData() {
+        String envPrefix = Main.ENV_PREFIX.get(targetEnvBox.getValue());
+        return productService.products(envPrefix)
+                .map(ProductCodec::decode)
+                .map(FXCollections::observableArrayList);
+    }
+
+    private Future<Void> renderData(ObservableList<Product> data) {
+        Platform.runLater(() -> product_list.setItems(data));
+        return Future.succeededFuture();
+    }
+
+    private void initProductColumns() {
+        product_colId.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("id"));
+        product_colName.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("name"));
+        product_colModel.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("model"));
+        product_colNs.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("spec"));
+        product_colDiff.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("diff"));
     }
 
     private void handleFail(Throwable throwable) {
@@ -121,10 +124,5 @@ public class HomeController {
             alert.headerTextProperty().setValue(message);
             alert.showAndWait();
         });
-    }
-
-    public void handleAction(ActionEvent event) {
-        System.out.println(event.getEventType().getName());
-        System.out.println(event.getSource().toString());
     }
 }
