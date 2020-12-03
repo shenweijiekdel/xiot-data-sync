@@ -13,10 +13,10 @@ public class ProductCodec {
         Integer id = o.getInteger("id");
         String template = o.getString("template");
         String name = o.getString("name");
-        JsonArray instances = o.getJsonArray("instances");
-        String type = instances.getJsonObject(0).getString("type");
-        DeviceType deviceType = DeviceType.fromString(type);
-        return new Product(id, name, deviceType.model(), deviceType.ns(), template);
+        List<Instance> instances = InstanceCodec.decode(o.getJsonArray("instances", new JsonArray()));
+        DeviceType type = instances.get(0).getType();
+        JsonObject group = o.getJsonObject("group", new JsonObject());
+        return new Product(id, name, type.model(), type.ns(), template, group.getString("code")).setInstances(instances);
     }
 
     public static List<Product> decode(JsonArray arr) {

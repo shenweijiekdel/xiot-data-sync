@@ -33,8 +33,10 @@
                     <TableColumn text="ID" fx:id="product_colId"/>
                     <TableColumn text="名称" fx:id="product_colName"/>
                     <TableColumn text="型号" fx:id="product_colModel"/>
+                    <TableColumn text="开发组" fx:id="product_colGroup"/>
                     <TableColumn text="名字空间" fx:id="product_colNs"/>
                     <TableColumn text="差异" fx:id="product_colDiff"/>
+                    <TableColumn text="操作" fx:id="product_operation_col"/>
                 </columns>
             </TableView>
         </Tab>

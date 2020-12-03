@@ -2,29 +2,22 @@ package cn.geekcity.xiot.view;
 
 import cn.geekcity.xiot.Main;
 import cn.geekcity.xiot.StageType;
+import cn.geekcity.xiot.domain.Instance;
 import cn.geekcity.xiot.domain.Product;
-import cn.geekcity.xiot.domain.ProductCodec;
-import cn.geekcity.xiot.domain.ProductDiffer;
+import cn.geekcity.xiot.service.ProductDiffer;
+import cn.geekcity.xiot.spec.codec.vertx.instance.DeviceCodec;
 import cn.geekcity.xiot.utils.StageUtils;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import javafx.application.Platform;
 import javafx.beans.Observable;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.ContextMenuEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static cn.geekcity.xiot.Main.productService;
 
@@ -39,6 +32,8 @@ public class HomeController {
     public ChoiceBox<String> envBox;
     public TableColumn<Object, Object> product_colDiff;
     public ChoiceBox<String> targetEnvBox;
+    public TableColumn<Object, Object> product_colGroup;
+    public TableColumn<Object, Object> product_operation_col;
 
     public HomeController() {
         stage.onShownProperty().setValue(this::onShown);
@@ -64,8 +59,7 @@ public class HomeController {
 
     public Future<ObservableList<Product>> getSourceData() {
         String envPrefix = Main.ENV_PREFIX.get(envBox.getValue());
-        return productService.products(envPrefix)
-                .map(ProductCodec::decode)
+        return productService.productsWithInstances(envPrefix)
                 .map(FXCollections::observableArrayList);
     }
 
@@ -75,28 +69,15 @@ public class HomeController {
                 .compose(this::renderData);
     }
 
-    private ObservableList<Product> markdiff(ObservableList<Product> source, ObservableList<Product> target) {
-        return FXCollections.observableArrayList(source.stream().peek(x -> {
-            Optional<Product> first = target.stream().filter(x1 -> x1.getModel().equals(x.getModel()) && x1.getSpec().equals(x.getSpec())).findFirst();
-            if (!first.isPresent()) {
-                x.setDiff("not exists");
-                return;
-            }
-
-            Product tar = first.get();
-            if (!x.getName().equals(tar.getName())) {
-                x.setDiff("name");
-                return;
-            }
-
-            x.setDiff("no diff");
-        }).collect(Collectors.toList()));
+    private ObservableList<Product> markdiff(List<Product> source, List<Product> target) {
+        List<Product> diff = ProductDiffer.diff(source, target);
+        return FXCollections.observableArrayList(diff);
     }
+
 
     public Future<ObservableList<Product>> getTargetEnvData() {
         String envPrefix = Main.ENV_PREFIX.get(targetEnvBox.getValue());
-        return productService.products(envPrefix)
-                .map(ProductCodec::decode)
+        return productService.productsWithInstances(envPrefix)
                 .map(FXCollections::observableArrayList);
     }
 
@@ -110,7 +91,33 @@ public class HomeController {
         product_colName.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("name"));
         product_colModel.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("model"));
         product_colNs.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("spec"));
+        product_colGroup.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("group"));
         product_colDiff.cellValueFactoryProperty().setValue(new PropertyValueFactory<>("diff"));
+        product_operation_col.setCellFactory((col) -> new TableCell<Object, Object>() {
+            @Override
+            protected void updateItem(Object item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty) {
+                    //如果此列为空默认不添加元素
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    Button btn = new Button("同步");
+
+
+                    int index = getIndex();
+                    Product product = product_list.getItems().get(index);
+
+                    btn.setOnMouseClicked((col1) -> {
+                        System.out.println(product.getName());
+                    });
+
+                    this.setGraphic(btn);
+                }
+
+            }
+        });
     }
 
     private void handleFail(Throwable throwable) {

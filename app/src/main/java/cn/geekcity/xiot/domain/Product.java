@@ -1,7 +1,12 @@
 package cn.geekcity.xiot.domain;
 
+import cn.geekcity.xiot.spec.instance.Device;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Product {
 
@@ -9,12 +14,15 @@ public class Product {
     private final SimpleStringProperty name = new SimpleStringProperty("");
     private final SimpleStringProperty model = new SimpleStringProperty("");
     private final SimpleStringProperty spec = new SimpleStringProperty("");
+    private final SimpleStringProperty group = new SimpleStringProperty("");
     private final SimpleStringProperty template = new SimpleStringProperty("");
     private final SimpleStringProperty diff = new SimpleStringProperty("");
+    private final Map<Integer, Instance> instances = new HashMap<>();
 
-    public Product(Integer id, String name, String model, String spec, String template) {
+    public Product(Integer id, String name, String model, String spec, String template, String group) {
         this.id.set(id);
         this.name.set(name);
+        this.group.set(group);
         this.model.set(model);
         this.spec.set(spec);
         this.template.set(template);
@@ -22,6 +30,40 @@ public class Product {
 
     public int getId() {
         return id.get();
+    }
+
+    public Product addInstance(Instance instance) {
+        instances.put(instance.getVersion(), instance);
+        return this;
+    }
+
+    public Product setInstances(List<Instance> instance) {
+        for (Instance i : instance) {
+            instances.put(i.getVersion(), i);
+        }
+
+        return this;
+    }
+
+    public Product addDiff(String diff) {
+        setDiff(this.diff.get() + "\n" + diff);
+        return this;
+    }
+
+    public Map<Integer, Instance> getInstances() {
+        return instances;
+    }
+
+    public String getGroup() {
+        return group.get();
+    }
+
+    public SimpleStringProperty groupProperty() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group.set(group);
     }
 
     public SimpleIntegerProperty idProperty() {
@@ -38,6 +80,14 @@ public class Product {
 
     public SimpleStringProperty nameProperty() {
         return name;
+    }
+
+    public String getDiff() {
+        return diff.get();
+    }
+
+    public SimpleStringProperty diffProperty() {
+        return diff;
     }
 
     public void setName(String name) {

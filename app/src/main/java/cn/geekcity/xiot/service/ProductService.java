@@ -1,9 +1,12 @@
 package cn.geekcity.xiot.service;
 
+import cn.geekcity.xiot.domain.Product;
 import cn.geekcity.xiot.service.impl.ProductServiceImpl;
+import cn.geekcity.xiot.spec.instance.Device;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
+
+import java.util.List;
 
 public interface ProductService {
 
@@ -11,5 +14,7 @@ public interface ProductService {
         return new ProductServiceImpl(vertx);
     }
 
-    Future<JsonArray> products(String envPrefix);
+    Future<List<Product>> productsWithInstances(String envPrefix);
+
+    Future<Device> getInstance(String envPrefix, String type);
 }
