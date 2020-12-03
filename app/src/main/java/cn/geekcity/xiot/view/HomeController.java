@@ -2,6 +2,7 @@ package cn.geekcity.xiot.view;
 
 import cn.geekcity.xiot.Main;
 import cn.geekcity.xiot.StageType;
+import cn.geekcity.xiot.domain.Group;
 import cn.geekcity.xiot.domain.Instance;
 import cn.geekcity.xiot.domain.Product;
 import cn.geekcity.xiot.service.ProductDiffer;
@@ -34,6 +35,7 @@ public class HomeController {
     public ChoiceBox<String> targetEnvBox;
     public TableColumn<Object, Object> product_colGroup;
     public TableColumn<Object, Object> product_operation_col;
+    public ChoiceBox<List<Group>> currentGroup;
 
     public HomeController() {
         stage.onShownProperty().setValue(this::onShown);
@@ -104,8 +106,6 @@ public class HomeController {
                     setGraphic(null);
                 } else {
                     Button btn = new Button("同步");
-
-
                     int index = getIndex();
                     Product product = product_list.getItems().get(index);
 
@@ -132,4 +132,6 @@ public class HomeController {
             alert.showAndWait();
         });
     }
+
+
 }

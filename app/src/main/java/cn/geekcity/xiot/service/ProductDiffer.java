@@ -17,7 +17,7 @@ public class ProductDiffer {
     public static List<Product> diff(List<Product> source, List<Product> target) {
         return source.stream().peek(x -> {
             Optional<Product> first = target.stream().filter(x1 -> checkSameProduct(x, x1)).findFirst();
-            x.addDiff("");
+            x.setDiff("");
             if (!first.isPresent()) {
                 x.addDiff("目标环境不存在");
                 return;
