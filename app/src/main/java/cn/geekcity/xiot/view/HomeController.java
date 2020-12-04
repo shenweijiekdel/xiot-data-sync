@@ -1,5 +1,6 @@
 package cn.geekcity.xiot.view;
 
+import cn.geekcity.xiot.LocalStorage;
 import cn.geekcity.xiot.Main;
 import cn.geekcity.xiot.StageType;
 import cn.geekcity.xiot.domain.Group;
@@ -17,8 +18,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.StringConverter;
 
 import java.util.List;
+import java.util.Optional;
 
 import static cn.geekcity.xiot.Main.productService;
 
@@ -35,7 +38,7 @@ public class HomeController {
     public ChoiceBox<String> targetEnvBox;
     public TableColumn<Object, Object> product_colGroup;
     public TableColumn<Object, Object> product_operation_col;
-    public ChoiceBox<List<Group>> currentGroup;
+    public ChoiceBox<Group> currentGroup;
 
     public HomeController() {
         stage.onShownProperty().setValue(this::onShown);
@@ -43,10 +46,41 @@ public class HomeController {
 
     private void onShown(WindowEvent event) {
         initProductColumns();
+        initCurrentGroupBox();
         envBox.getSelectionModel().selectedItemProperty().addListener(this::handleEnvChanged);
         targetEnvBox.getSelectionModel().selectedItemProperty().addListener(this::handleTargetEnvChanged);
+        currentGroup.getSelectionModel().selectedItemProperty().addListener(this::handleCurrentGroupChanged);
         getSourceData()
                 .compose(this::renderData);
+    }
+
+    private void handleCurrentGroupChanged(Observable observable, Group oldValue, Group newValue) {
+        LocalStorage.setCurrentGroup(String.valueOf(newValue.getId()));
+        System.out.println(LocalStorage.getCurrentGroup());
+    }
+
+    private void initCurrentGroupBox() {
+        currentGroup.setConverter(new StringConverter<Group>() {
+            @Override
+            public String toString(Group object) {
+                return object.getCode();
+            }
+
+            @Override
+            public Group fromString(String string) {
+                Optional<Group> first = currentGroup.getItems().stream().filter(x -> x.getCode().equals(string)).findFirst();
+                return first.get();
+            }
+        });
+        String envPrefix = Main.ENV_PREFIX.get(envBox.getValue());
+        Main.groupService.available(envPrefix)
+                .onComplete(ar -> {
+                    if (ar.succeeded()) {
+                        currentGroup.setItems(FXCollections.observableArrayList(ar.result()));
+                    } else {
+                        handleFail(ar.cause());
+                    }
+                });
     }
 
     private void handleTargetEnvChanged(Observable observable, String oldValue, String newValue) {

@@ -26,8 +26,8 @@
             <String fx:value="Prod"/>
         </ChoiceBox>
 
-        <Label text="当前开发组" GridPane.rowIndex="0" GridPane.columnIndex="4"/>
-        <ChoiceBox fx:id="currentGroup" GridPane.columnIndex="5" GridPane.rowIndex="0" value="Dev"/>
+        <Label text="当前开发组" GridPane.rowIndex="0" GridPane.columnIndex="8"/>
+        <ChoiceBox fx:id="currentGroup" GridPane.columnIndex="9" GridPane.rowIndex="0"/>
     </GridPane>
     <TabPane prefHeight="768">
         <Tab text="产品" closable="false">

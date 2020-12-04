@@ -1,6 +1,7 @@
 package cn.geekcity.xiot;
 
 import cn.geekcity.xiot.service.AccountService;
+import cn.geekcity.xiot.service.GroupService;
 import cn.geekcity.xiot.service.ProductService;
 import cn.geekcity.xiot.service.impl.AccountServiceImpl;
 import cn.geekcity.xiot.utils.StageUtils;
@@ -25,8 +26,9 @@ public class Main extends Application {
 
     public static Vertx vertx = Vertx.vertx();
     public static final Map<String ,String > ENV_PREFIX = new HashMap<>();
-    public static AccountService account = AccountService.create(vertx);
-    public static ProductService productService = ProductService.create(vertx);
+    public static final AccountService account = AccountService.create(vertx);
+    public static final ProductService productService = ProductService.create(vertx);
+    public static final GroupService groupService = GroupService.create(vertx);
 
     @Override
     public void start(Stage primaryStage) throws Exception {
