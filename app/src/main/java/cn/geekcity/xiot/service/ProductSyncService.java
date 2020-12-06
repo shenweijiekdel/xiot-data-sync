@@ -1,16 +1,19 @@
 package cn.geekcity.xiot.service;
 
 import cn.geekcity.xiot.domain.Product;
+import cn.geekcity.xiot.domain.VProduct;
+import cn.geekcity.xiot.domain.VTemplate;
 import cn.geekcity.xiot.service.impl.AccountServiceImpl;
+import cn.geekcity.xiot.service.impl.ProductSyncServiceImpl;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 public interface ProductSyncService {
 
-    static ProductSyncService create(Vertx vertx) {
-        return new AccountServiceImpl(vertx);
+    static ProductSyncService create() {
+        return new ProductSyncServiceImpl();
     }
 
-    Future<JsonObject> sync(String targetEnvPrefix, Product product);
+    void sync(String currentGroup, VProduct product);
 }

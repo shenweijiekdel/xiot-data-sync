@@ -1,5 +1,6 @@
 package cn.geekcity.xiot.service;
 
+import cn.geekcity.xiot.domain.DataDiffer;
 import cn.geekcity.xiot.domain.Instance;
 import cn.geekcity.xiot.domain.Product;
 import cn.geekcity.xiot.spec.codec.vertx.instance.ActionCodec;
@@ -7,151 +8,145 @@ import cn.geekcity.xiot.spec.codec.vertx.instance.EventCodec;
 import cn.geekcity.xiot.spec.codec.vertx.instance.PropertyCodec;
 import cn.geekcity.xiot.spec.instance.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ProductDiffer {
+public class ProductDiffer implements DataDiffer<Product> {
 
-    public static List<Product> diff(List<Product> source, List<Product> target) {
-        return source.stream().peek(x -> {
-            Optional<Product> first = target.stream().filter(x1 -> checkSameProduct(x, x1)).findFirst();
-            x.setDiff("");
-            if (!first.isPresent()) {
-                x.addDiff("目标环境不存在");
-                return;
-            }
 
-            Product tar = first.get();
-            instanceDiff(x, tar);
-        }).collect(Collectors.toList());
-    }
+    private static void instanceDiff(Product source, Product current, List<String> messages) {
+        if (current == null) {
+            messages.add("当前环境不存在");
+            return ;
+        }
 
-    private static void instanceDiff(Product source, Product target) {
-        if (source.getInstances().size() != target.getInstances().size()) {
-            source.addDiff("实例数量不同");
-            return;
+        if (!source.getTemplate().equals(current.getTemplate())) {
+            messages.add("模板不相同");
         }
 
         for (Instance value : source.getInstances().values()) {
-            Instance targetInstance = target.getInstances().get(value.getVersion());
-            if (targetInstance == null) {
-                source.addDiff("目标环境不存在 version " + value.getVersion());
+            Instance currentInstance = current.getInstances().get(value.getVersion());
+            if (currentInstance == null) {
+                messages.add("目标环境不存在 version " + value.getVersion());
                 continue;
             }
 
 
-            deviceDiff(value.getContent(), targetInstance.getContent(), source);
+            deviceDiff(value.getContent(), currentInstance.getContent(), messages);
         }
     }
 
-    private static void deviceDiff(Device source, Device target, Product product) {
-        if (!source.type().toString().equals(target.type().toString())) {
-            product.addDiff("目标环境实例type不相同 ");
+    private static void deviceDiff(Device source, Device current, List<String> messages) {
+        if (!source.type().toString().equals(current.type().toString())) {
+            messages.add("目标环境实例type不相同 ");
             return;
         }
 
-        descriptionDiff(source.description(), target.description(), product);
-        servicesDiff(source.services(), target.services(), product);
+        descriptionDiff(source.description(), current.description(), messages);
+        servicesDiff(source.services(), current.services(), messages);
     }
 
-    private static void servicesDiff(Map<Integer, Service> source, Map<Integer, Service> target, Product product) {
+    private static void servicesDiff(Map<Integer, Service> source, Map<Integer, Service> current, List<String> messages) {
         for (Service sourceService : source.values()) {
-            Service targetService = target.get(sourceService.iid());
-            if (targetService == null) {
-                product.addDiff("service iid " + sourceService.iid() + "不存在");
+            Service currentService = current.get(sourceService.iid());
+            if (currentService == null) {
+                messages.add("service iid " + sourceService.iid() + "不存在");
                 continue;
             }
 
-            serviceDiff(sourceService, targetService, product);
+            serviceDiff(sourceService, currentService, messages);
         }
     }
 
-    private static void serviceDiff(Service source, Service target, Product product) {
-        if (!source.type().toString().equals(target.type().toString())) {
-            product.addDiff("service " + source.type().toString() + "存在差异");
+    private static void serviceDiff(Service source, Service current, List<String> messages) {
+        if (!source.type().toString().equals(current.type().toString())) {
+            messages.add("service " + source.type().toString() + "存在差异");
             return;
         }
 
-        propertiesDiff(source.properties(), target.properties(), product);
-        actionsDiff(source.actions(), target.actions(), product);
-        eventsDiff(source.events(), target.events(), product);
+        propertiesDiff(source.properties(), current.properties(), messages);
+        actionsDiff(source.actions(), current.actions(), messages);
+        eventsDiff(source.events(), current.events(), messages);
     }
 
-    private static void eventsDiff(Map<Integer, Event> source, Map<Integer, Event> target, Product product) {
+    private static void eventsDiff(Map<Integer, Event> source, Map<Integer, Event> current, List<String> messages) {
         for (Event sourceEvent : source.values()) {
-            Event targetEvent = target.get(sourceEvent.iid());
-            if (targetEvent == null) {
-                product.addDiff("action " + sourceEvent.type().toString() + "不存在");
+            Event currentEvent = current.get(sourceEvent.iid());
+            if (currentEvent == null) {
+                messages.add("action " + sourceEvent.type().toString() + "不存在");
                 continue;
             }
 
-            eventDiff(sourceEvent, targetEvent, product);
+            eventDiff(sourceEvent, currentEvent, messages);
         }
     }
 
-    private static void actionsDiff(Map<Integer, Action> source, Map<Integer, Action> target, Product product) {
+    private static void actionsDiff(Map<Integer, Action> source, Map<Integer, Action> current, List<String> messages) {
         for (Action sourceAction : source.values()) {
-            Action targetAction = target.get(sourceAction.iid());
-            if (targetAction == null) {
-                product.addDiff("action " + sourceAction.type().toString() + "不存在");
+            Action currentAction = current.get(sourceAction.iid());
+            if (currentAction == null) {
+                messages.add("action " + sourceAction.type().toString() + "不存在");
                 continue;
             }
 
-            actionDiff(sourceAction, targetAction, product);
+            actionDiff(sourceAction, currentAction, messages);
         }
     }
 
-    private static void propertiesDiff(Map<Integer, Property> source, Map<Integer, Property> target, Product product) {
+    private static void propertiesDiff(Map<Integer, Property> source, Map<Integer, Property> current, List<String> messages) {
         for (Property sourceProperty : source.values()) {
-            Property targetProperty = target.get(sourceProperty.iid());
-            if (targetProperty == null) {
-                product.addDiff("property " + sourceProperty.type().toString() + "不存在");
+            Property currentProperty = current.get(sourceProperty.iid());
+            if (currentProperty == null) {
+                messages.add("property " + sourceProperty.type().toString() + "不存在");
                 continue;
             }
 
-            propertyDiff(sourceProperty, targetProperty, product);
+            propertyDiff(sourceProperty, currentProperty, messages);
         }
     }
 
-    private static void eventDiff(Event source, Event target, Product product) {
+    private static void eventDiff(Event source, Event current, List<String> messages) {
         String sourceString = EventCodec.encode(source).encode();
-        String targetString = EventCodec.encode(target).encode();
-        if (!sourceString.equals(targetString)) {
-            product.addDiff("event " + source.type().toString() + " 不同");
+        String currentString = EventCodec.encode(current).encode();
+        if (!sourceString.equals(currentString)) {
+            messages.add("event " + source.type().toString() + " 不同");
         }
     }
 
-    private static void actionDiff(Action source, Action target, Product product) {
+    private static void actionDiff(Action source, Action current, List<String> messages) {
         String sourceString = ActionCodec.encode(source).encode();
-        String targetString = ActionCodec.encode(target).encode();
-        if (!sourceString.equals(targetString)) {
-            product.addDiff("action " + source.type().toString() + " 不同");
+        String currentString = ActionCodec.encode(current).encode();
+        if (!sourceString.equals(currentString)) {
+            messages.add("action " + source.type().toString() + " 不同");
         }
     }
 
-    private static void propertyDiff(Property source, Property target, Product product) {
+    private static void propertyDiff(Property source, Property current, List<String> messages) {
         String sourceString = PropertyCodec.encode(source).encode();
-        String targetString = PropertyCodec.encode(target).encode();
-        if (!sourceString.equals(targetString)) {
-            product.addDiff("property " + source.type().toString() + " 不同");
+        String currentString = PropertyCodec.encode(current).encode();
+        if (!sourceString.equals(currentString)) {
+            messages.add("property " + source.type().toString() + " 不同");
         }
     }
 
-    private static void descriptionDiff(Map<String, String> source, Map<String, String> target, Product product) {
+    private static void descriptionDiff(Map<String, String> source, Map<String, String> current, List<String> messages) {
         for (Map.Entry<String, String> s : source.entrySet()) {
-            String t = target.get(s.getKey());
+            String t = current.get(s.getKey());
 
             if (!t.equals(s.getValue())) {
-                product.addDiff("实例定义描述不同");
+                messages.add("实例定义描述不同");
                 return;
             }
         }
     }
 
-    private static boolean checkSameProduct(Product source, Product target) {
-        return source.getModel().equals(target.getModel()) && source.getSpec().equals(target.getSpec()) && source.getGroup().equals(target.getGroup());
+    @Override
+    public String diff(Product source, Product current) {
+        List<String> messages = new ArrayList<>();
+        instanceDiff(source, current, messages);
+        return String.join("\n", messages);
     }
-
 }

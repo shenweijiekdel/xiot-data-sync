@@ -1,5 +1,6 @@
 package cn.geekcity.xiot.service.impl;
 
+import cn.geekcity.xiot.EnvEnum;
 import cn.geekcity.xiot.service.AccountService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -12,24 +13,21 @@ import org.slf4j.LoggerFactory;
 
 public class AccountServiceImpl implements AccountService {
 
-    private static final String HOST = "dev-iot-account.knowin.com";
-    private static final int PORT = 443;
+    private static final String HOST_SUFFIX = "iot-account.knowin.com";
     private final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
     private final WebClient client;
 
     public AccountServiceImpl(Vertx vertx) {
         WebClientOptions options = new WebClientOptions();
-        options.setDefaultHost(HOST);
-        options.setDefaultPort(PORT);
         options.setSsl(true);
         client = WebClient.create(vertx, options);
     }
 
     @Override
-    public Future<JsonObject> login(String username, String password) {
+    public Future<JsonObject> login(EnvEnum env, String username, String password) {
         Promise<JsonObject> promise = Promise.promise();
 
-        client.post("/v1/login")
+        client.postAbs(String.format("https://%s%s/v1/login", env.getPrefix(), HOST_SUFFIX))
                 .sendJson(new JsonObject().put("username", username).put("password", password), ar -> {
                     if (ar.succeeded()) {
                         if (ar.result().statusCode() == 200) {

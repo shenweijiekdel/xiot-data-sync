@@ -7,6 +7,8 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import java.lang.String?>
 <GridPane fx:controller="cn.geekcity.xiot.view.LoginController"
           xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
     <children>
@@ -14,6 +16,9 @@
         <TextField fx:id="tx_username" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
         <Label text="密码" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
         <PasswordField fx:id="tx_password" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="目标环境" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <ChoiceBox fx:id="envChoiceBox" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+
         <Button fx:id="button" text="登录"  onAction="#handleLogin"  GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.halignment="RIGHT"/>
 
     </children>

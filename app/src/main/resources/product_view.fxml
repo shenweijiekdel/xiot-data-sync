@@ -1,0 +1,60 @@
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import java.lang.String?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="cn.geekcity.xiot.view.ProductController">
+    <GridPane alignment="CENTER">
+        <Label text="数据环境" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <ChoiceBox fx:id="fromEnvBox" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+        <Label text="当前环境" GridPane.rowIndex="0" GridPane.columnIndex="4"/>
+        <Label fx:id="currentEnvironmentLabel" GridPane.rowIndex="0" GridPane.columnIndex="5"/>
+        <Label text="当前开发组" GridPane.rowIndex="0" GridPane.columnIndex="8"/>
+        <ChoiceBox fx:id="currentGroup" GridPane.columnIndex="9" GridPane.rowIndex="0"/>
+    </GridPane>
+    <TableView fx:id="product_list"  VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn text="ID">
+                <cellValueFactory>
+                    <PropertyValueFactory property="id"/>
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="名称">
+                <cellValueFactory>
+                    <PropertyValueFactory property="name"/>
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="型号">
+                <cellValueFactory>
+                    <PropertyValueFactory property="model"/>
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="开发组">
+                <cellValueFactory>
+                    <PropertyValueFactory property="group"/>
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="名字空间">
+                <cellValueFactory>
+                    <PropertyValueFactory property="spec"/>
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="差异">
+                <cellValueFactory>
+                    <PropertyValueFactory property="diff"/>
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="操作" fx:id="operationCol">
+            </TableColumn>
+        </columns>
+    </TableView>
+</VBox>
+

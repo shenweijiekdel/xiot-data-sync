@@ -3,76 +3,66 @@ package cn.geekcity.xiot;
 import cn.geekcity.xiot.service.AccountService;
 import cn.geekcity.xiot.service.GroupService;
 import cn.geekcity.xiot.service.ProductService;
-import cn.geekcity.xiot.service.impl.AccountServiceImpl;
-import cn.geekcity.xiot.utils.StageUtils;
+import cn.geekcity.xiot.service.TemplateService;
+import cn.geekcity.xiot.utils.StageManager;
 import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
-import io.vertx.core.dns.AddressResolverOptions;
-import io.vertx.core.dns.DnsClient;
-import io.vertx.core.json.JsonObject;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Main extends Application {
 
     public static Vertx vertx = Vertx.vertx();
-    public static final Map<String ,String > ENV_PREFIX = new HashMap<>();
     public static final AccountService account = AccountService.create(vertx);
     public static final ProductService productService = ProductService.create(vertx);
     public static final GroupService groupService = GroupService.create(vertx);
+    public static final TemplateService templateService = TemplateService.create(vertx);
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        initEnv();
-        Parent root = FXMLLoader.load(getClass().getResource("/sample.fxml"));
-        primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 300, 275));
         primaryStage.hide();
         initLoginStage();
-        initHomeStage();
+        initProductStage();
+        initSelectStage();
+        initTemplateStage();
         loadStage();
     }
 
     private void loadStage() {
-        String token = LocalStorage.get("token");
-        if (token == null) {
-            StageUtils.getStage(StageType.LOGIN_STAGE).show();
-        } else {
-            StageUtils.getStage(StageType.HOME_STAGE).show();
-        }
+        Stage stage = StageManager.getStage(StageType.HOME);
+        stage.show();
     }
 
-    private void initEnv(){
-        ENV_PREFIX.put("Dev","dev-");
-        ENV_PREFIX.put("Stage","st-");
-        ENV_PREFIX.put("Preview","pv-");
-        ENV_PREFIX.put("Prod","");
-    }
     private void initLoginStage() throws IOException {
-        Stage stage = StageUtils.getStage(StageType.LOGIN_STAGE);
+        Stage stage = StageManager.getStage(StageType.LOGIN);
         Parent root = FXMLLoader.load(getClass().getResource("/login/login.fxml"));
-        stage.onCloseRequestProperty().setValue(e -> System.exit(0));
         stage.setTitle("登录");
         stage.setScene(new Scene(root, 500, 300));
     }
 
-    private void initHomeStage() throws IOException {
-        Stage stage = StageUtils.getStage(StageType.HOME_STAGE);
-        stage.onCloseRequestProperty().setValue(e -> System.exit(0));
-        stage.onShownProperty().setValue(e -> {
+    private void initSelectStage() throws IOException {
+        Stage stage = StageManager.getStage(StageType.HOME);
+        Parent root = FXMLLoader.load(getClass().getResource("/select_view.fxml"));
+        stage.setTitle("IoT控制台数据同步工具");
+        stage.setScene(new Scene(root, 500, 300));
 
-        });
-        Parent root = FXMLLoader.load(getClass().getResource("/home.fxml"));
-        stage.setTitle("主页");
+    }
+
+    private void initProductStage() throws IOException {
+        Stage stage = StageManager.getStage(StageType.PRODUCT);
+        Parent root = FXMLLoader.load(getClass().getResource("/product_view.fxml"));
+        stage.setTitle("产品同步");
+        stage.setScene(new Scene(root, 1024, 768));
+    }
+
+    private void initTemplateStage() throws IOException {
+        Stage stage = StageManager.getStage(StageType.TEMPLATE);
+        Parent root = FXMLLoader.load(getClass().getResource("/template_view.fxml"));
+        stage.setTitle("模板同步");
         stage.setScene(new Scene(root, 1024, 768));
     }
 

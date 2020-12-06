@@ -1,5 +1,6 @@
 package cn.geekcity.xiot.service;
 
+import cn.geekcity.xiot.EnvEnum;
 import cn.geekcity.xiot.service.impl.AccountServiceImpl;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -11,5 +12,5 @@ public interface AccountService {
         return new AccountServiceImpl(vertx);
     }
 
-    Future<JsonObject> login(String username, String password);
+    Future<JsonObject> login(EnvEnum env, String username, String password);
 }

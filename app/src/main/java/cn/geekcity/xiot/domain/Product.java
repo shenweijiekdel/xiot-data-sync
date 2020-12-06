@@ -1,52 +1,79 @@
 package cn.geekcity.xiot.domain;
 
-import cn.geekcity.xiot.spec.instance.Device;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Product {
 
-    private final SimpleIntegerProperty id = new SimpleIntegerProperty(0);
-    private final SimpleStringProperty name = new SimpleStringProperty("");
-    private final SimpleStringProperty model = new SimpleStringProperty("");
-    private final SimpleStringProperty spec = new SimpleStringProperty("");
-    private final SimpleStringProperty group = new SimpleStringProperty("");
-    private final SimpleStringProperty template = new SimpleStringProperty("");
-    private final SimpleStringProperty diff = new SimpleStringProperty("");
+    private Integer id;
+    private String name;
+    private String model;
+    private String spec;
+    private String group;
+    private String template;
     private final Map<Integer, Instance> instances = new HashMap<>();
 
-    public Product(Integer id, String name, String model, String spec, String template, String group) {
-        this.id.set(id);
-        this.name.set(name);
-        this.group.set(group);
-        this.model.set(model);
-        this.spec.set(spec);
-        this.template.set(template);
+    public Product(Integer id, String name, String model, String ns, String template, String code) {
+        this.id = id;
+        this.name = name;
+        this.model = model;
+        this.spec = ns;
+        this.template = template;
+        this.group = code;
     }
 
-    public int getId() {
-        return id.get();
+    public Integer getId() {
+        return id;
     }
 
-    public Product addInstance(Instance instance) {
-        instances.put(instance.getVersion(), instance);
+    public Product setId(Integer id) {
+        this.id = id;
         return this;
     }
 
-    public Product setInstances(List<Instance> instance) {
-        for (Instance i : instance) {
-            instances.put(i.getVersion(), i);
-        }
+    public String getName() {
+        return name;
+    }
 
+    public Product setName(String name) {
+        this.name = name;
         return this;
     }
 
-    public Product addDiff(String diff) {
-        setDiff(this.diff.get() + "\n" + diff);
+    public String getModel() {
+        return model;
+    }
+
+    public Product setModel(String model) {
+        this.model = model;
+        return this;
+    }
+
+    public String getSpec() {
+        return spec;
+    }
+
+    public Product setSpec(String spec) {
+        this.spec = spec;
+        return this;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public Product setGroup(String group) {
+        this.group = group;
+        return this;
+    }
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public Product setTemplate(String template) {
+        this.template = template;
         return this;
     }
 
@@ -54,83 +81,13 @@ public class Product {
         return instances;
     }
 
-    public String getGroup() {
-        return group.get();
-    }
+    public Product setInstances(List<Instance> instances) {
+        this.instances.clear();
 
-    public SimpleStringProperty groupProperty() {
-        return group;
-    }
+        for (Instance i : instances) {
+            this.instances.put(i.getVersion(), i);
+        }
 
-    public void setGroup(String group) {
-        this.group.set(group);
-    }
-
-    public SimpleIntegerProperty idProperty() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id.set(id);
-    }
-
-    public String getName() {
-        return name.get();
-    }
-
-    public SimpleStringProperty nameProperty() {
-        return name;
-    }
-
-    public String getDiff() {
-        return diff.get();
-    }
-
-    public SimpleStringProperty diffProperty() {
-        return diff;
-    }
-
-    public void setName(String name) {
-        this.name.set(name);
-    }
-
-    public String getModel() {
-        return model.get();
-    }
-
-    public SimpleStringProperty modelProperty() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model.set(model);
-    }
-
-    public void setDiff(String diff) {
-        this.diff.set(diff);
-    }
-
-    public String getSpec() {
-        return spec.get();
-    }
-
-    public SimpleStringProperty specProperty() {
-        return spec;
-    }
-
-    public void setSpec(String spec) {
-        this.spec.set(spec);
-    }
-
-    public String getTemplate() {
-        return template.get();
-    }
-
-    public SimpleStringProperty templateProperty() {
-        return template;
-    }
-
-    public void setTemplate(String template) {
-        this.template.set(template);
+        return this;
     }
 }

@@ -1,8 +1,11 @@
 package cn.geekcity.xiot.service;
 
+import cn.geekcity.xiot.EnvEnum;
 import cn.geekcity.xiot.domain.Product;
 import cn.geekcity.xiot.service.impl.ProductServiceImpl;
+import cn.geekcity.xiot.spec.definition.urn.Urn;
 import cn.geekcity.xiot.spec.instance.Device;
+import cn.geekcity.xiot.spec.template.DeviceTemplate;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 
@@ -14,7 +17,11 @@ public interface ProductService {
         return new ProductServiceImpl(vertx);
     }
 
-    Future<List<Product>> productsWithInstances(String envPrefix);
+    Future<List<Product>> productsWithInstances(EnvEnum env);
 
-    Future<Device> getInstance(String envPrefix, String type);
+    Future<Product> getProductWIthInstance(EnvEnum env, String spec, String vendor, String model);
+
+    Future<Device> getInstance(EnvEnum env, String type);
+
+    Future<Product> create(String spec, String model, String name, String template);
 }

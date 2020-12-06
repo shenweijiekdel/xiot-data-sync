@@ -1,5 +1,6 @@
 package cn.geekcity.xiot.service;
 
+import cn.geekcity.xiot.EnvEnum;
 import cn.geekcity.xiot.domain.Group;
 import cn.geekcity.xiot.domain.Instance;
 import cn.geekcity.xiot.domain.Product;
@@ -23,5 +24,5 @@ public interface GroupService {
         return new GroupServiceImpl(vertx);
     }
 
-    Future<List<Group>> available(String targetEnvPrefix);
+    Future<List<Group>> available(EnvEnum env);
 }

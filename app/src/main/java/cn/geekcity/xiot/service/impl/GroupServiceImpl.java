@@ -1,12 +1,12 @@
 package cn.geekcity.xiot.service.impl;
 
+import cn.geekcity.xiot.EnvEnum;
 import cn.geekcity.xiot.LocalStorage;
 import cn.geekcity.xiot.domain.Group;
 import cn.geekcity.xiot.domain.GroupCodec;
 import cn.geekcity.xiot.domain.Product;
 import cn.geekcity.xiot.domain.ProductCodec;
 import cn.geekcity.xiot.service.GroupService;
-import cn.geekcity.xiot.service.ProductSyncService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class GroupServiceImpl implements ProductSyncService {
+public class GroupServiceImpl implements GroupService {
 
     private static final String HOST_SUFFIX = "iot-dvlp.knowin.com";
     private final WebClient client;
@@ -32,7 +32,34 @@ public class GroupServiceImpl implements ProductSyncService {
     }
 
     @Override
-    public Future<JsonObject> sync(String targetEnvPrefix, Product product) {
-        return null;
+    public Future<List<Group>> available(EnvEnum env) {
+        Promise<List<Group>> promise = Promise.promise();
+
+        client.getAbs(String.format("https://%s%s/group/available", env.getPrefix(), HOST_SUFFIX))
+                .bearerTokenAuthentication(LocalStorage.getToken())
+                .send(ar -> {
+                    if (ar.succeeded()) {
+                        if (ar.result().statusCode() == 200) {
+                            JsonObject body = ar.result().bodyAsJsonObject();
+                            if (body.getString("msg").equals("ok")) {
+                                JsonArray data = body.getJsonArray("data", new JsonArray());
+
+                                promise.complete(GroupCodec.decode(data));
+                            } else {
+                                String description = body.getString("description");
+                                logger.error("get group error: {}", description);
+                                promise.fail("get group error: " + description);
+                            }
+                        } else {
+                            logger.error("get group error: status={}", ar.result().statusCode());
+                            promise.fail(ar.result().statusMessage());
+                        }
+                    } else {
+                        logger.error("get group error: {}", ar.cause());
+                        promise.fail("get group error: " + ar.cause().getMessage());
+                    }
+                });
+
+        return promise.future();
     }
 }

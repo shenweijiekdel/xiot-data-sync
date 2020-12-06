@@ -1,0 +1,49 @@
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import java.lang.String?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.layout.HBox?>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="cn.geekcity.xiot.view.TemplateController">
+    <HBox alignment="CENTER">
+        <Label text="数据环境" />
+        <ChoiceBox fx:id="dataEnvChoiceBox" />
+        <Label text="当前环境" GridPane.rowIndex="0" GridPane.columnIndex="4"/>
+        <Label fx:id="currentEnvironmentLabel" GridPane.rowIndex="0" GridPane.columnIndex="5"/>
+        <Label text="当前开发组" GridPane.rowIndex="0" GridPane.columnIndex="8"/>
+        <ChoiceBox fx:id="currentGroup"/>
+    </HBox>
+    <TableView  VBox.vgrow="ALWAYS" fx:id="templateView">
+        <columns>
+            <TableColumn text="设备类型" prefWidth="200">
+                <cellValueFactory>
+                    <PropertyValueFactory property="type"/>
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="名称">
+                <cellValueFactory>
+                    <PropertyValueFactory property="name"/>
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="差异" prefWidth="300">
+                <cellValueFactory>
+                    <PropertyValueFactory property="diff"/>
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="操作" fx:id="operationCol">
+            </TableColumn>
+        </columns>
+        <items >
+        </items>
+    </TableView>
+</VBox>
+

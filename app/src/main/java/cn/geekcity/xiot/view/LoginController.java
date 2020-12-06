@@ -1,26 +1,35 @@
 package cn.geekcity.xiot.view;
 
-import cn.geekcity.xiot.LocalStorage;
-import cn.geekcity.xiot.Main;
-import cn.geekcity.xiot.StageType;
-import cn.geekcity.xiot.utils.StageUtils;
+import cn.geekcity.xiot.*;
+import cn.geekcity.xiot.utils.StageManager;
 import cn.geekcity.xiot.utils.md5.Md5Utils;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.event.EventHandler;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import javafx.util.StringConverter;
 
-public class LoginController {
+public class LoginController extends AbstractController {
 
-    private final Stage stage = StageUtils.getStage(StageType.LOGIN_STAGE);
     public TextField tx_username;
     public PasswordField tx_password;
     public Button button;
+    public ChoiceBox<EnvEnum> envChoiceBox;
+    private ProgressFrom progressFrom;
+
+    public LoginController() {
+        super(StageManager.getStage(StageType.LOGIN));
+    }
+
+    @Override
+    protected void onShown(WindowEvent windowEvent) {
+        initEnvChoiceBox();
+        progressFrom = new ProgressFrom("Loading...",stage);
+    }
 
     public void handleLogin(ActionEvent event) {
         String username = tx_username.textProperty().get();
@@ -28,33 +37,32 @@ public class LoginController {
         username = "shenweijiekdel";
         password = "swj7528065";
         if (username.isEmpty() || password.isEmpty()) {
-            alert(Alert.AlertType.ERROR, "必须输入用户名或密码");
-            return ;
+            StageManager.alert(Alert.AlertType.ERROR, "登录失败", "必须输入用户名或密码");
+            return;
         }
+        Platform.runLater(() -> {
+            progressFrom.activateProgressBar();
 
-        Main.account.login(username, Md5Utils.md5(password))
+        });
+
+        Main.account.login(envChoiceBox.getValue(), username, Md5Utils.md5(password))
                 .compose(this::putUserInfo)
                 .compose(x -> toHomePage())
                 .onFailure(this::handleFail);
     }
 
     private void handleFail(Throwable throwable) {
-        alert(Alert.AlertType.ERROR, throwable.getMessage());
-    }
-
-    private void alert(Alert.AlertType type, String message) {
         Platform.runLater(() -> {
-            Alert alert = new Alert(type);
-            alert.titleProperty().setValue("登录失败");
-            alert.headerTextProperty().setValue(message);
-            alert.showAndWait();
+            progressFrom.cancelProgressBar();
         });
+        StageManager.alert(Alert.AlertType.ERROR, "登录失败", throwable.getMessage());
     }
 
     private Future<Void> toHomePage() {
+        LocalStorage.setEnv(envChoiceBox.getValue());
         Platform.runLater(() -> {
-            stage.hide();
-            StageUtils.getStage(StageType.HOME_STAGE).show();
+            progressFrom.cancelProgressBar();
+            startStage(StageManager.getStage(StageType.HOME), true);
         });
 
         return Future.succeededFuture();
@@ -65,5 +73,11 @@ public class LoginController {
         LocalStorage.put("token", token);
         LocalStorage.put("user", userInfo.encode());
         return Future.succeededFuture();
+    }
+
+    private void initEnvChoiceBox() {
+        envChoiceBox.setConverter(new EnvConverter());
+        envChoiceBox.getItems().addAll(EnvEnum.Dev, EnvEnum.Stage, EnvEnum.Preview, EnvEnum.Prod);
+        envChoiceBox.setValue(EnvEnum.Dev);
     }
 }
