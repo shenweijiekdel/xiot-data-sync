@@ -17,9 +17,9 @@
         <Label text="密码" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
         <PasswordField fx:id="tx_password" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
         <Label text="目标环境" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <ChoiceBox fx:id="envChoiceBox" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+        <ChoiceBox fx:id="envChoiceBox" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-        <Button fx:id="button" text="登录"  onAction="#handleLogin"  GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.halignment="RIGHT"/>
+        <Button fx:id="button" text="登录"  onAction="#handleLogin"  GridPane.rowIndex="2" GridPane.columnIndex="2" GridPane.halignment="RIGHT" onKeyPressed="#handleKeyPressed"/>
 
     </children>
 

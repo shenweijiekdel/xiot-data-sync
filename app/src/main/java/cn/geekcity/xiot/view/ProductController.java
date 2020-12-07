@@ -38,7 +38,6 @@ public class ProductController extends AbstractController {
     public ChoiceBox<EnvEnum> fromEnvBox;
     public ChoiceBox<Group> currentGroup;
     public Label currentEnvironmentLabel;
-    public Button diffButton;
     public TableColumn<Object, Object> operationCol;
     private ProgressFrom loading;
 
@@ -59,7 +58,7 @@ public class ProductController extends AbstractController {
     private void initFromEnvBox() {
         fromEnvBox.setConverter(new EnvConverter());
         List<EnvEnum> fromDevs = Stream.of(EnvEnum.Dev, EnvEnum.Stage, EnvEnum.Preview, EnvEnum.Prod).filter(x -> x != LocalStorage.getEnv()).collect(Collectors.toList());
-        fromEnvBox.getItems().addAll(fromDevs);
+        fromEnvBox.setItems(FXCollections.observableArrayList(fromDevs));
         fromEnvBox.setValue(fromDevs.get(0));
         fromEnvBox.getSelectionModel().selectedItemProperty().addListener(this::handleEnvChanged);
 
@@ -67,11 +66,10 @@ public class ProductController extends AbstractController {
 
     private void initCurrentGroupBox() {
         currentGroup.setConverter(new GroupConverter(currentGroup));
-        EnvEnum value = fromEnvBox.getValue();
-        Main.groupService.available(value)
+        Main.groupService.available(LocalStorage.getEnv())
                 .onComplete(ar -> {
                     if (ar.succeeded()) {
-                        currentGroup.setItems(FXCollections.observableArrayList(ar.result()));
+                        Platform.runLater(() -> currentGroup.setItems(FXCollections.observableArrayList(ar.result())));
                     } else {
                         handleFail(ar.cause());
                     }
@@ -111,7 +109,14 @@ public class ProductController extends AbstractController {
                             return;
                         }
 
-                        syncService.sync(String.valueOf(currentGroup.getId()), product);
+                        syncService.sync(currentGroup, product)
+                                .onComplete(ar -> {
+                                    if (ar.succeeded()) {
+                                        product.setCurrent(ar.result());
+                                    } else {
+                                        StageManager.alert(Alert.AlertType.ERROR, "同步失败", ar.cause().getMessage());
+                                    }
+                                });
                     });
 
                     this.setGraphic(btn);
@@ -134,7 +139,7 @@ public class ProductController extends AbstractController {
                         if (ar.succeeded()) {
                             items.get(finalI).setCurrent(ar.result());
                         } else {
-                            logger.error("product {} get currentEnv error", p.getId());
+                            logger.error("product {} get currentEnv error {}", p.getId(), ar.cause());
                             items.get(finalI).setCurrent(null);
                         }
                     });

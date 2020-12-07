@@ -57,6 +57,7 @@ public class TemplateServiceImpl implements TemplateService {
                                 .compose(x -> getTemplate(env, template.type()))
                                 .onComplete(promise);
                     } else {
+                        logger.info("create template");
                         create(env, currentGroup, template)
                                 .compose(x -> getTemplate(env, template.type()))
                                 .onComplete(promise);

@@ -1,6 +1,7 @@
 package cn.geekcity.xiot.service;
 
 import cn.geekcity.xiot.EnvEnum;
+import cn.geekcity.xiot.domain.Group;
 import cn.geekcity.xiot.domain.Product;
 import cn.geekcity.xiot.service.impl.ProductServiceImpl;
 import cn.geekcity.xiot.spec.definition.urn.Urn;
@@ -23,5 +24,7 @@ public interface ProductService {
 
     Future<Device> getInstance(EnvEnum env, String type);
 
-    Future<Product> create(String spec, String model, String name, String template);
+    Future<Product> create(String spec, String model, String name, String template, Group group);
+
+    Future<Void> saveInstance(int productId, int version, Device device, Group group);
 }

@@ -131,7 +131,7 @@ public class TemplateController extends AbstractController {
     private void initDataEnvChoiceBox() {
         dataEnvChoiceBox.setConverter(new EnvConverter());
         List<EnvEnum> fromDevs = Stream.of(EnvEnum.Dev, EnvEnum.Stage, EnvEnum.Preview, EnvEnum.Prod).filter(x -> x != LocalStorage.getEnv()).collect(Collectors.toList());
-        dataEnvChoiceBox.getItems().addAll(fromDevs);
+        dataEnvChoiceBox.setItems(FXCollections.observableArrayList(fromDevs));
         dataEnvChoiceBox.setValue(fromDevs.get(0));
         dataEnvChoiceBox.getSelectionModel().selectedItemProperty().addListener(this::handleDataEnvChanged);
 
@@ -168,7 +168,14 @@ public class TemplateController extends AbstractController {
                             return;
                         }
 
-                        syncService.sync(String.valueOf(currentGroup.getId()), template);
+                        syncService.sync(String.valueOf(currentGroup.getId()), template)
+                                .onComplete(ar -> {
+                                    if (ar.succeeded()) {
+                                        template.setCurrent(ar.result());
+                                    } else {
+                                        StageManager.alert(Alert.AlertType.ERROR, "同步失败", ar.cause().getMessage());
+                                    }
+                                });
                     });
 
                     this.setGraphic(btn);

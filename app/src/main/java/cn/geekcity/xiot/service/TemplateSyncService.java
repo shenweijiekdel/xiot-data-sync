@@ -11,5 +11,5 @@ public interface TemplateSyncService {
         return new TemplateSyncServiceImpl();
     }
 
-    void sync(String currentGroup, VTemplate template);
+    Future<DeviceTemplate> sync(String currentGroup, VTemplate template);
 }

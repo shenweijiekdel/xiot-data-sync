@@ -93,7 +93,6 @@ public class ProductServiceImpl implements ProductService {
             return promise.future();
         }
 
-        //TODO 不存在则create product后保存instance，否则直接保存instance，同步完成后提示反馈
         client.postAbs(String.format("https://%s%s/product/new", env.getPrefix(), CONSOLE_HOST_SUFFIX))
                 .bearerTokenAuthentication(LocalStorage.getToken())
                 .putHeader("current-group", String.valueOf(group.getId()))
@@ -180,6 +179,44 @@ public class ProductServiceImpl implements ProductService {
                     } else {
                         logger.error("get product error: {}", ar.cause());
                         promise.fail("get product error: " + ar.cause().getMessage());
+                    }
+                });
+
+        return promise.future();
+    }
+
+
+    @Override
+    public Future<Void> saveInstance(int productId, int version, Device device, Group group) {
+        Promise<Void> promise = Promise.promise();
+
+        EnvEnum env = LocalStorage.getEnv();
+        if (env == null) {
+            promise.fail("env not found");
+            return promise.future();
+        }
+
+        client.putAbs(String.format("https://%s%s/instance/product/%s/%s", env.getPrefix(), CONSOLE_HOST_SUFFIX, productId, version))
+                .bearerTokenAuthentication(LocalStorage.getToken())
+                .putHeader("current-group", String.valueOf(group.getId()))
+                .sendJsonObject(new JsonObject().put("content", DeviceCodec.encode(device)), ar -> {
+                    if (ar.succeeded()) {
+                        if (ar.result().statusCode() == 200) {
+                            JsonObject body = ar.result().bodyAsJsonObject();
+                            if (body.getString("msg").equals("ok")) {
+                                promise.complete();
+                            } else {
+                                String description = body.getString("description");
+                                logger.error("save instance error: {}", description);
+                                promise.fail("save instance error: " + description);
+                            }
+                        } else {
+                            logger.error("save instance error: status={}", ar.result().statusCode());
+                            promise.fail(ar.result().statusMessage());
+                        }
+                    } else {
+                        logger.error("save instance error: {}", ar.cause());
+                        promise.fail("save instance error: " + ar.cause().getMessage());
                     }
                 });
 

@@ -9,6 +9,8 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
@@ -28,21 +30,22 @@ public class LoginController extends AbstractController {
     @Override
     protected void onShown(WindowEvent windowEvent) {
         initEnvChoiceBox();
-        progressFrom = new ProgressFrom("Loading...",stage);
+        progressFrom = new ProgressFrom("Loading...", stage);
     }
 
     public void handleLogin(ActionEvent event) {
+        login();
+    }
+
+    private void login() {
         String username = tx_username.textProperty().get();
         String password = tx_password.textProperty().get();
-        username = "shenweijiekdel";
-        password = "swj7528065";
         if (username.isEmpty() || password.isEmpty()) {
             StageManager.alert(Alert.AlertType.ERROR, "登录失败", "必须输入用户名或密码");
             return;
         }
         Platform.runLater(() -> {
             progressFrom.activateProgressBar();
-
         });
 
         Main.account.login(envChoiceBox.getValue(), username, Md5Utils.md5(password))
@@ -79,5 +82,11 @@ public class LoginController extends AbstractController {
         envChoiceBox.setConverter(new EnvConverter());
         envChoiceBox.getItems().addAll(EnvEnum.Dev, EnvEnum.Stage, EnvEnum.Preview, EnvEnum.Prod);
         envChoiceBox.setValue(EnvEnum.Dev);
+    }
+
+    public void handleKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            login();
+        }
     }
 }
