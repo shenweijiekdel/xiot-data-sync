@@ -26,6 +26,11 @@ public class SelectController extends AbstractController {
         }
     }
 
+    @Override
+    protected void onClose(WindowEvent event) {
+        System.exit(0);
+    }
+
     public void handleProductClicked(ActionEvent event) {
         startStage(StageManager.getStage(StageType.PRODUCT), false);
     }
