@@ -10,11 +10,13 @@ import cn.geekcity.xiot.domain.VProduct;
 import cn.geekcity.xiot.service.ProductSyncService;
 import cn.geekcity.xiot.spec.definition.urn.DeviceType;
 import cn.geekcity.xiot.utils.future.FutureMerger;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -67,7 +69,7 @@ public class ProductSyncServiceImpl implements ProductSyncService {
     private Future<Void> saveInstances(Product product, Map<Integer, Instance> instances, Group group) {
         Promise<Void> promise = Promise.promise();
 
-        FutureMerger.merge(instances.values().stream()
+        CompositeFuture.all(instances.values().stream()
                 .map(x -> Main.productService.saveInstance(product.getId(), x.getVersion(), x.getContent(), group))
                 .collect(Collectors.toList()))
                 .onComplete(ar -> {
