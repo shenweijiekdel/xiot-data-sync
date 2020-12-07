@@ -50,6 +50,10 @@ public class ProductDiffer implements DataDiffer<Product> {
     }
 
     private static void servicesDiff(Map<Integer, Service> source, Map<Integer, Service> current, List<String> messages) {
+        if (source.size() != current.size()) {
+            messages.add("service 个数不相同");
+        }
+
         for (Service sourceService : source.values()) {
             Service currentService = current.get(sourceService.iid());
             if (currentService == null) {
@@ -73,6 +77,10 @@ public class ProductDiffer implements DataDiffer<Product> {
     }
 
     private static void eventsDiff(Map<Integer, Event> source, Map<Integer, Event> current, List<String> messages) {
+        if (source.size() != current.size()) {
+            messages.add("event 个数不相同");
+        }
+
         for (Event sourceEvent : source.values()) {
             Event currentEvent = current.get(sourceEvent.iid());
             if (currentEvent == null) {
@@ -85,6 +93,10 @@ public class ProductDiffer implements DataDiffer<Product> {
     }
 
     private static void actionsDiff(Map<Integer, Action> source, Map<Integer, Action> current, List<String> messages) {
+        if (source.size() != current.size()) {
+            messages.add("action 个数不相同");
+        }
+
         for (Action sourceAction : source.values()) {
             Action currentAction = current.get(sourceAction.iid());
             if (currentAction == null) {
@@ -97,6 +109,10 @@ public class ProductDiffer implements DataDiffer<Product> {
     }
 
     private static void propertiesDiff(Map<Integer, Property> source, Map<Integer, Property> current, List<String> messages) {
+        if (source.size() != current.size()) {
+            messages.add("property 个数不相同");
+        }
+
         for (Property sourceProperty : source.values()) {
             Property currentProperty = current.get(sourceProperty.iid());
             if (currentProperty == null) {
